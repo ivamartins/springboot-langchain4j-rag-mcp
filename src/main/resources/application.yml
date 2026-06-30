@@ -1,0 +1,75 @@
+# =============================================================================
+#  Spring Boot + LangChain4j + Easy RAG + MCP
+# =============================================================================
+#  Tudo aqui é configurável por variável de ambiente, com defaults seguros
+#  para o ambiente de demo (langchain4j.dev/demo + MCP everything).
+# =============================================================================
+
+server:
+  port: 8080
+  # Habilita o shutdown gracioso (importante p/ fechar o subprocesso MCP)
+  shutdown: graceful
+
+spring:
+  application:
+    name: langchain4j-rag-mcp
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+
+logging:
+  level:
+    # INFO mostra o que está acontecendo sem inundar o log
+    dev.langchain4j: INFO
+    com.example.aistudio: DEBUG
+
+# -----------------------------------------------------------------------------
+#  LLM (qualquer endpoint OpenAI-compatível)
+# -----------------------------------------------------------------------------
+#  OpenAI:       LLM_BASE_URL=https://api.openai.com/v1  LLM_API_KEY=sk-...
+#  Ollama:       LLM_BASE_URL=http://localhost:11434/v1  LLM_MODEL=llama3.1
+#  LM Studio:    LLM_BASE_URL=http://localhost:1234/v1
+#  Demo público: LLM_BASE_URL=http://langchain4j.dev/demo/openai/v1  LLM_API_KEY=demo
+# -----------------------------------------------------------------------------
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: ${LLM_BASE_URL:http://langchain4j.dev/demo/openai/v1}
+      api-key:  ${LLM_API_KEY:demo}
+      model-name: ${LLM_MODEL:gpt-4o-mini}
+      temperature: 0.3
+      log-requests: false
+      log-responses: false
+      timeout: 120s
+
+  # ---------------------------------------------------------------------------
+  #  MCP (Model Context Protocol)
+  # ---------------------------------------------------------------------------
+  mcp:
+    enabled: ${MCP_ENABLED:true}
+    stdio:
+      # Comando + args que iniciam o servidor MCP como subprocesso.
+      # Pode ser um binário (ex: /home/iva/.npm-global/bin/mcp-server-everything)
+      # ou um pacote npm baixado on-demand.
+      command: ${MCP_COMMAND:/home/iva/.npm-global/bin/mcp-server-everything}
+      args:    ${MCP_ARGS:}
+      log-events: false
+
+# -----------------------------------------------------------------------------
+#  RAG
+# -----------------------------------------------------------------------------
+#  Coloque arquivos (.txt, .md, .pdf, .docx, ...) em:
+#    src/main/resources/documents/   (incluído no classpath)
+#  OU aponte rag.documents-path para qualquer pasta do filesystem.
+# -----------------------------------------------------------------------------
+rag:
+  documents-path: ${RAG_DOCS_PATH:classpath:documents}
+  # Quantos segmentos recuperar por query (top-k)
+  max-results: 5
+  # Score mínimo de similaridade (0..1) — abaixo disso, ignora
+  min-score: 0.4
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

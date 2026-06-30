@@ -1,0 +1,34 @@
+# Build output
+target/
+build/
+out/
+*.class
+*.jar
+!libs/*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Env / secrets
+.env
+.env.local
+
+# App data
+HELP.md
+.java-version
+.mvn/
+mvnw
+mvnw.cmd
